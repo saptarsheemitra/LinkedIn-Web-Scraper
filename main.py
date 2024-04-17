@@ -49,6 +49,7 @@ driver.find_element(By.XPATH, "//button[@type='submit']").click()
 # In case of an error, try changing the
 # XPath used here.
 # //*[@id="global-nav-search"]/div
+time.sleep(10)
 search_button = driver.find_element(By.XPATH,'//*[@id="global-nav-search"]/div')
 driver.implicitly_wait(3)
 search_button.click()
@@ -69,14 +70,7 @@ current_url = driver.current_url
 posts_url = current_url.replace('all', 'content',1)
 driver.get(posts_url)
 
-# page_source = driver.page_source
-# file_ps = open('page_source.txt','w',encoding='utf-8')
-# # print(page_source)
-# # test = page_source.__str__
-# file_ps.write(page_source)
-# soup = BeautifulSoup(page_source, features="html.parser")
-# soup_txt = open('soup_post.txt','w',encoding='utf-8')
-# soup_txt.write(soup.prettify())
+
 
 
 #####################################################################################################################
@@ -211,44 +205,6 @@ def get_media_info(container):
             return link['href'] if link else "None", media_type
     return "None", "Unknown"
 
-posts_data = []
-
-# Main loop to process each container
-for container in containers:
-    post_text = get_text(container, "div", {"class": "feed-shared-update-v2__description-wrapper"})
-    media_link, media_type = get_media_info(container)
-    post_date = get_text(container, "div", {"class": "ml4 mt2 text-body-xsmall t-black--light"})
-    post_date = get_actual_date(post_date)
-    
-    # Reactions (likes)
-    reactions_element = container.find_all(lambda tag: tag.name == 'button' and 'aria-label' in tag.attrs and 'reaction' in tag['aria-label'].lower())
-    reactions_idx = 1 if len(reactions_element) > 1 else 0
-    post_reactions = reactions_element[reactions_idx].text.strip() if reactions_element and reactions_element[reactions_idx].text.strip() != '' else 0
-
-    # Comments
-    comment_element = container.find_all(lambda tag: tag.name == 'button' and 'aria-label' in tag.attrs and 'comment' in tag['aria-label'].lower())
-    comment_idx = 1 if len(comment_element) > 1 else 0
-    post_comments = comment_element[comment_idx].text.strip() if comment_element and comment_element[comment_idx].text.strip() != '' else 0
-
-    # Shares
-    shares_element = container.find_all(lambda tag: tag.name == 'button' and 'aria-label' in tag.attrs and 'repost' in tag['aria-label'].lower())
-    shares_idx = 1 if len(shares_element) > 1 else 0
-    post_shares = shares_element[shares_idx].text.strip() if shares_element and shares_element[shares_idx].text.strip() != '' else 0
-        
-        
-    # Append the collected data to the posts_data list
-    posts_data.append({
-        # "Page": company_name,#FIXME - fix required
-        "Date": post_date,
-        "Post Text": post_text,
-        "Media Type": media_type,
-        "Likes": post_reactions,
-        "Comments": post_comments,
-        "Shares":post_shares,
-        "Likes Numeric": convert_abbreviated_to_number(post_reactions),
-        "Media Link": media_link
-    })
-
 
 posts_data = []
 
@@ -278,13 +234,13 @@ for container in containers:
     # Append the collected data to the posts_data list
     posts_data.append({
         # "Page": company_name,
-        "Date": post_date,
+        # "Date": post_date,
         "Post Text": post_text,
         "Media Type": media_type,
-        "Likes": post_reactions,
-        "Comments": post_comments,
-        "Shares":post_shares,
-        "Likes Numeric": convert_abbreviated_to_number(post_reactions),
+        # "Likes": post_reactions,
+        # "Comments": post_comments,
+        # "Shares":post_shares,
+        # "Likes Numeric": convert_abbreviated_to_number(post_reactions),
         "Media Link": media_link
     })
 
@@ -303,7 +259,7 @@ for col in df.columns:
     except:
         pass
     
-df.sort_values(by="Likes Numeric", inplace=True, ascending=False)
+# df.sort_values(by="Likes Numeric", inplace=True, ascending=False)
 
 df.to_csv("posts.csv", encoding='utf-8', index=False)
 # df.to_excel("{}_linkedin_posts.xlsx".format(company_name), index=False)
